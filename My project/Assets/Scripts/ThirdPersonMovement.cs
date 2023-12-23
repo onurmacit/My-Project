@@ -38,7 +38,7 @@ public class ThirdPersonMovement : MonoBehaviour
         }
         else
         {
-            controller.Move(Vector3.zero); // Hareketi durdur
+            controller.Move(Vector3.zero);
             StartIdleAnim();
         }
     }
