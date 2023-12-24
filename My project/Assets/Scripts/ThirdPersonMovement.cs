@@ -7,15 +7,18 @@ public class ThirdPersonMovement : MonoBehaviour
     public CharacterController controller;
     public Transform cam;
 
-    public float speed = 6f;
+    public float normalSpeed = 6f;
+    public float boostedSpeed = 9f;
     public float turnSmoothTime = 0.1f;
 
-    float turnSmoothVelocity;
-    Animator playerAnim;
+    private float currentSpeed;
+    private float turnSmoothVelocity;
+    private Animator playerAnim;
 
     void Start()
     {
         playerAnim = GetComponent<Animator>();
+        currentSpeed = normalSpeed;
     }
 
     void Update()
@@ -24,6 +27,9 @@ public class ThirdPersonMovement : MonoBehaviour
         float vertical = Input.GetAxisRaw("Vertical");
         Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
 
+        bool isBoosted = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+
+        currentSpeed = isBoosted ? boostedSpeed : normalSpeed;
 
         if (direction.magnitude >= 0.1f)
         {
@@ -32,9 +38,16 @@ public class ThirdPersonMovement : MonoBehaviour
             transform.rotation = Quaternion.Euler(0f, angle, 0f);
 
             Vector3 moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
-            controller.Move(moveDir.normalized * speed * Time.deltaTime);
+            controller.Move(moveDir.normalized * currentSpeed * Time.deltaTime);
 
-            StartRunAnim();
+            if (isBoosted)
+            {
+                StartSprintAnim();
+            }
+            else
+            {
+                StartRunAnim();
+            }
         }
         else
         {
@@ -47,11 +60,20 @@ public class ThirdPersonMovement : MonoBehaviour
     {
         playerAnim.SetBool("IdleAnim", false);
         playerAnim.SetBool("RunAnim", true);
+        playerAnim.SetBool("SprintAnim", false);
+    }
+
+    private void StartSprintAnim()
+    {
+        playerAnim.SetBool("IdleAnim", false);
+        playerAnim.SetBool("RunAnim", false);
+        playerAnim.SetBool("SprintAnim", true);
     }
 
     private void StartIdleAnim()
     {
         playerAnim.SetBool("IdleAnim", true);
         playerAnim.SetBool("RunAnim", false);
+        playerAnim.SetBool("SprintAnim", false);
     }
 }
